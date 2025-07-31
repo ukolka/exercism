@@ -1,0 +1,44 @@
+# input string at $a0
+# current character at $t0
+# bit mask at $t1
+# boolean result at $v0
+
+.globl is_isogram
+
+is_isogram:
+	or $v0, 1 # default to true
+	lb $t0, ($a0) # load first char
+	move $t1, $zero # init mask
+	
+next_char:
+	beqz $t0, end_is_isogram # end on null char
+	
+	blt $t0, 'A', skip_char # skip space, digits, punctuation, control chars
+	nop
+	
+	bge $t0, 'a', lowercase_char # if (!lowercase)
+	nop	
+	sub $t0, $t0, '@' # then convert uppercase
+lowercase_char:
+	sub $t0, $t0, '`' # else convert lowercase
+	
+	li $t2, 1 # start a bit mask for this char
+	sllv $t2, $t2, $t0 # place 1 at t0-th bit
+	
+	and $t3, $t2, $t1 # check if t0-th bit is already set
+	bnez $t3, end_is_isogram_false # not an isogram if it is set
+	nop
+	
+	or $t1, $t1, $t2 # put it in the mask
+
+skip_char:
+	addu $a0, $a0, 1 # move char pointer
+	lb $t0, ($a0) # dereference it
+	j next_char
+	
+end_is_isogram_false:
+	move $v0, $zero
+
+end_is_isogram:
+	jr $ra
+	nop
