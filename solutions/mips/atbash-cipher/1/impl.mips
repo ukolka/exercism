@@ -1,0 +1,66 @@
+# - read input string from a0
+# - write a zero-terminated string representing the return value to address given in a1
+
+.globl atbash_cipher
+
+atbash_cipher:
+	sub $sp, $sp, 4
+	sw $a1, ($sp) # push a1
+
+	move $t2, $zero # t2 is char count
+	lb $t0, ($a0) # load char
+	
+next_char:
+	beqz $t0, end_atbash_cipher
+	nop
+	
+	blt $t0, 'A', skip_char
+	nop
+	
+	bge $t0, 'a', lowercase_char
+	nop
+	sub $t0, $t0, 'A' # convert uppercase into a position respective to 'A'
+	j translate_char
+	nop
+lowercase_char:
+	sub $t0, $t0, 'a' # convert lowercase into a position respective to 'a'
+	
+translate_char:
+	addiu $t1, $zero, 'z' # set t1 to 'z'
+	sub $t0, $t1, $t0 #  translate char
+	
+	sb $t0, ($a1) # store translated char
+	add $a1, $a1, 1 # advance output pointer
+	
+	
+	addu $t2, $t2, 1 # increment char count if char > 'A'
+	rem $t3, $t2, 5 # if t2 % 5 == 0 print ' '
+	beqz $t3, print_space
+	nop
+	
+skip_char:
+	add $a0, $a0, 1 # increment pointer
+	lb $t0, ($a0) # load char
+	
+	j next_char
+	nop
+	
+print_space:	
+	addiu $t3, $zero, ' ' # t3 is ' '
+	sb $t3, ($a1) # store ' ' in output
+	add $a1, $a1, 1 # increment output
+	j skip_char
+	nop
+	
+end_atbash_cipher:
+	lb $t0, -1($a1)
+	bne $t0, ' ', pop_and_return
+	nop
+	sb $zero, -1($a1)
+
+pop_and_return:
+	lw $a1, ($sp)
+	add $sp, $sp, 4 # pop a1
+
+	jr $ra
+	nop
