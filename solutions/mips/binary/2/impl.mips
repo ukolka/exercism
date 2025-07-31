@@ -1,0 +1,25 @@
+# $a0 is input string address
+# $v0 is output
+
+.globl binary_convert
+
+binary_convert:
+	or $v0, $zero, $zero # reset the output
+	
+next_char:
+	lb $t1, ($a0) # char in $t1
+	beqz $t1, string_end
+	nop
+	
+	seq $t1, $t1, 0x31 # t1 is 1 if char is '1' otherwise '0'
+	sll $v0, $v0, 1 # shift result left 
+	or $v0, $v0, $t1 # add the int into result
+	
+	addiu $a0, $a0, 1 # point at the next character byte
+	j next_char
+	nop
+	
+	
+string_end:
+	jr $ra
+	nop
