@@ -1,0 +1,72 @@
+.globl difference_of_squares
+
+difference_of_squares:
+	sub $sp, $sp, 4
+	sw $ra, ($sp) # push $ra onto the stack
+	sub $sp, $sp, 4
+	sw $a0, ($sp) # push $a0 onto the stack
+	
+	jal sum_in_range
+	nop
+	
+	lw $a0, ($sp) # restore $a0 from stack
+	
+	sub $sp, $sp, 4
+	sw $v0, ($sp) # push sum_in_range result onto stack	
+	
+	jal sum_of_squares # v0 is sum_of_squares
+	nop
+	
+	lw $t0, ($sp)
+	add $sp, $sp, 4 # pop sum_in_range into t0
+	
+	mult $t0, $t0
+	mflo $t0 # t0  = t0 ^ 2
+	
+	sub $v0, $t0, $v0 # v0 is sum_in_range ^ 2 - sum_fo_squares
+	
+end_difference_of_squares:
+	add $sp, $sp, 4 # pop a0
+	lw $ra, ($sp)
+	add $sp, $sp, 4 # pop ra
+
+	jr $ra
+	nop
+	
+	
+sum_in_range:
+	move $v0, $zero # accumulator
+	
+next_int:
+	beqz $a0, end_sum_in_range
+	
+	addu $v0, $v0, $a0 # accumulate
+	
+	sub $a0, $a0, 1 # decrement range
+	j next_int
+	nop
+	
+end_sum_in_range:
+	jr $ra
+	nop
+
+
+
+sum_of_squares:
+	move $v0, $zero # accumulator
+	
+next_square:
+	beqz $a0, end_sum_of_squares
+	
+	multu $a0, $a0
+	mflo $t0 # $t0 is $a0 ^ 2
+	
+	addu $v0, $v0, $t0 # accumulate
+	
+	subu $a0, $a0, 1 # decrement range
+	j next_square
+	nop
+	
+end_sum_of_squares:
+	jr $ra
+	nop
