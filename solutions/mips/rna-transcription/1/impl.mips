@@ -1,0 +1,58 @@
+# a0 input str
+# a1 output str
+
+.globl transcribe_rna
+
+transcribe_rna:
+	lb $t0, ($a0)
+	nop
+	sub $sp, $sp, 4
+	sw $a1, ($sp) # push a1 onto the stack
+	
+	
+next_char:
+	beqz $t0, end_transcribe_rna # end when the null terminator is encountered
+	nop
+	
+	beq $t0, 0x47, case_G
+	nop
+	beq $t0, 0x43, case_C
+	nop
+	beq $t0, 0x54, case_T
+	nop
+	beq $t0, 0x41, case_A
+	
+	j end_switch
+	nop
+case_G:
+	or $t1, $0, 0x43 # C	
+	
+	j end_switch
+	nop
+case_C:
+	or $t1, $0, 0x47 # G
+
+	j end_switch
+	nop
+case_T:
+	or $t1, $0, 0x41 # A
+
+	j end_switch
+	nop
+case_A:
+	or $t1, $0, 0x55 # U
+	
+end_switch:
+	sb $t1, ($a1) # write the translated char
+	addu $a0, $a0, 1 # point at the next in char
+	addu $a1, $a1, 1 # point at the next out char
+	lb $t0, ($a0) # load next in char
+	j next_char
+	nop
+	
+end_transcribe_rna:
+	lw $a1, ($sp)
+	add $sp, $sp, 4 # pop a1 from the stack
+
+	jr $ra
+	nop
