@@ -1,0 +1,137 @@
+.text
+	.globl raindrops
+
+# $a0 is the input integer
+# - write a zero-terminated string representing the return value to address given in a1
+raindrops:
+	sub $sp, $sp, 4 # ----------------------------------------- start debugging here
+	sw $ra, ($sp) # push $ra
+	sub $sp, $sp, 4
+	sw $s0, ($sp) # push $s0
+	sub $sp, $sp, 4
+	sw $a1, ($sp) # push $a1
+	sub $sp, $sp, 4
+	sw $a0, ($sp) # push $a0
+
+	addiu $s0, $zero, 1 # pass through flag
+	
+check_pling:
+	rem $t0, $a0, 3 # get remainder
+	bnez $t0, check_plang # if it's not zero, skip to the next test
+	nop
+	
+	move $s0, $zero # don't pass through
+	la $a0, Pling
+	jal print_word
+	lw $a0, ($sp) # pop and push $a0
+	nop
+check_plang:
+	rem $t0, $a0, 5 # get remainder
+	bnez $t0, check_plong # if it's not zero, skip to the next test
+	nop
+	
+	move $s0, $zero # don't pass through
+	la $a0, Plang
+	jal, print_word
+	lw $a0, ($sp) # pop and push $a0
+	nop
+check_plong:
+	rem $t0, $a0, 7 # get remainder
+	bnez $t0, pass_number_through # if it's not zero, skip to default
+	nop
+	
+	move $s0, $zero # don't pass through
+	la $a0, Plong
+	jal, print_word
+	lw $a0, ($sp) # pop and push $a0
+	nop
+pass_number_through:
+	beqz $s0, end_raindrops
+	nop
+	
+	jal print_number
+	nop
+	
+end_raindrops:
+	lw $a0, ($sp)
+	add $sp, $sp, 4 # pop $a0
+	lw $a1, ($sp)
+	add $sp, $sp, 4 # pop $a1
+	lw $s0, ($sp) 
+	add $sp, $sp, 4 # pop $s0
+	lw $ra, ($sp) 
+	add $sp, $sp, 4 # pop $ra
+	jr $ra
+	nop
+
+# $a0 is the word to print
+# $a1 is where to print to
+print_word:	
+	lb $t0, ($a0) # read input char
+	
+print_word_loop:
+	beqz $t0, end_print_word
+	nop
+	
+	sb $t0, ($a1) # write to output
+	
+	add $a0, $a0, 1 # advance input
+	lb $t0, ($a0) # read new char
+	add $a1, $a1, 1 # advance output
+	j print_word_loop
+	nop
+	
+end_print_word:
+	jr $ra
+	nop
+
+# $a0 is the number to print
+# $a1 is the output string
+print_number:
+	sub $sp, $sp, 4
+	sw $a0, ($sp) # push a0
+	sub $sp, $sp, 4
+	sw $a1, ($sp) # push a1
+	
+	addiu $t2, $zero, 10
+	move $t3, $sp # save stack pointer
+
+print_number_build_stack:
+	beqz $a0, print_number_from_stack
+	nop
+	
+	div $a0, $t2
+	mfhi $t0 # $t0 = $a0 % 10
+	mflo $a0 # $a0 /= 10
+	
+	add $t0, $t0, '0' # remainder to char
+	sub $sp, $sp, 1
+	sb $t0, ($sp) # push char to stack
+	
+	j print_number_build_stack
+	nop
+	
+print_number_from_stack:
+	beq $t3, $sp, end_print_number # ran out of stacked chars
+	nop
+	
+	lb $t0, ($sp)
+	add $sp, $sp, 1 # pop char
+	
+	sb $t0, ($a1) # output char
+	add $a1, $a1, 1 # advance output
+	j print_number_from_stack
+	nop
+	
+end_print_number:
+	lw $a1, ($sp)
+	add $sp, $sp, 4 # pop $a1
+	lw $a0, ($sp)
+	add $sp, $sp, 4 # pop $a0
+	jr $ra
+	nop
+
+.data
+	Pling: .asciiz "Pling"
+	Plang: .asciiz "Plang"
+	Plong: .asciiz "Plong"
