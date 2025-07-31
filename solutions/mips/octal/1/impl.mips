@@ -1,0 +1,22 @@
+.globl octal_convert
+
+octal_convert:
+	or $v0, $zero, $zero # reset result
+	
+next_char:
+	lb $t0, ($a0) # load next char
+	nop
+	beqz $t0, string_end # end if null
+	nop 
+	
+	subiu $t0, $t0, 0x30 # char to int
+	sll $v0, $v0, 3 # times 8
+	or $v0, $v0, $t0 # stick int into result
+	
+	addiu $a0, $a0, 1 # advance to next char
+	j next_char
+	nop
+	
+string_end:
+	jr $ra
+	nop
