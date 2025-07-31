@@ -1,0 +1,35 @@
+.globl hex_convert
+
+hex_convert:
+	or $v0, $0, $0 # reset result
+	
+next_char:
+	lb $t0, ($a0)
+	nop
+	beqz $t0, string_end
+	nop
+	
+	subu $t0, $t0, 0x30 # $t0 - '0'
+	bltu $t0, 10, is_numeric_digit # if digit is neither numeric
+	nop
+	bltu $t0, 23, is_uppercase_digit  # nor uppercase
+	nop
+	
+	subu $t0, $t0, 39 # make lowercase digit numeric
+	j is_numeric_digit
+	nop
+	
+is_uppercase_digit:
+	subu $t0, $t0, 7 # make uppercase digit numeric
+	
+is_numeric_digit:  # else
+	sll $v0, $v0, 4 # x 16
+	or $v0, $t0, $v0 # fill with converted number
+	
+	addu $a0, $a0, 1 # advance to next char
+	j next_char
+	nop
+	
+string_end:
+	jr $ra
+	nop
