@@ -1,0 +1,21 @@
+(ns armstrong-numbers)
+
+(defn into-digits [num]
+  (->> (take-while 
+        (partial < 0) 
+        (iterate #(quot % 10) num))
+       (map #(rem % 10))))
+
+(defn pow [base exp]
+   (apply * (repeat exp base)))
+
+(defn exp-digits [digits]
+  (let [num-digits (count digits)]
+    (map #(pow % num-digits) digits)))
+
+(defn armstrong? [num]
+  (->> num
+       into-digits
+       exp-digits
+       (apply +)
+       (= num)))
