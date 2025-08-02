@@ -1,0 +1,48 @@
+# $a0, $a1, $a2 - triangle sides
+# - write result to v0 as:
+#       0 - scalene
+#       1 - isoceles
+#       2 - equilateral
+#       3 - invalid triangle
+
+.globl triangle
+
+triangle:
+	addiu $v0, $zero, 3 # invalid result by default
+	
+	addiu $t1, $zero, 1 # $t2 valid flag by default
+	
+	addu $t0, $a1, $a2 # t0 = a1 + a2
+	slt $t2, $a0, $t0 # a0 < a1 + a2
+	
+	and $t1, $t1, $t2 # update validity
+	
+	addu $t0, $a0, $a2 # t0 = a0 + a2
+	slt $t2, $a1, $t0 # a1 < a0 + a2
+	
+	and $t1, $t1, $t2 # update validity
+	
+	addu $t0, $a1, $a0 # t0 = a1 + a0
+	slt $t2, $a2, $t0  # $a2 < a1 + a0
+	
+	and $t1, $t1, $t2 # update validity
+	
+	beqz $t1, end_triangle # return default on invalid triangle
+	nop
+	
+	seq $t0, $a0, $a1 # $a0 == $a1
+	seq $t1, $a1, $a2 # $a1 == $a2
+	seq $t3, $a0, $a2 # $a0 == $a2
+	
+	and $v0, $t0, $t1 # a0 == a1 && a1 == a2 
+	and $v0, $v0, $t3 # && a0 == a2
+	sll $v0, $v0, 1 # make 2 if there's 1
+	bnez $v0, end_triangle
+	
+	or $v0, $t0, $t1 # a0 == a1 || a1 == a2
+	or $v0, $v0, $t3 # || a0 == a2
+	# v0 is 1 if isosceles
+	
+end_triangle:
+	jr $ra
+	nop

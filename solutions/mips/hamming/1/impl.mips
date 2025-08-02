@@ -1,0 +1,29 @@
+.globl hamming_distance
+
+hamming_distance:
+	move $v0, $zero # reset accumulator
+	
+next_char:
+	lb $t0, ($a0) # char
+	nop
+	lb $t1, ($a1) # char to compare
+	nop
+
+	beqz $t0, end_hamming_distance # encountered null - end
+	nop
+	beqz $t1, end_hamming_distance # encountered null - end
+	nop
+	
+	
+	sne $t0, $t0, $t1 # t1 is 0 if chars are equal, 1 otherwise
+	addu $v0, $v0, $t0 # accumulate
+	
+	
+	addu $a0, $a0, 1 # advance to the next char
+	addu $a1, $a1, 1 # advance to the next char
+	j next_char
+	
+
+end_hamming_distance:
+	jr $ra
+	nop

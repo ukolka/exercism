@@ -1,0 +1,56 @@
+.data
+	.align 2
+	primes: .space 1024
+	
+.text
+	.globl nth_prime
+
+# $a0 prime index starting with 1
+# $t0 prime count - 1
+# $t1 current candidate
+# $v0 - result
+nth_prime:
+	addiu $t2, $zero, 2 # just 2
+	sw $t2, primes # set it as first prime
+	addiu $t1, $zero, 3 # init candidate
+	
+	move $t0, $zero # init the index
+	mul $a0, $a0, 4 # turn $a0 in to an offset of primes
+	subu $a0, $a0, 4 # decrement the offset to make it 0 based
+	
+
+test_candidate:
+	beq $t0, $a0, end_nth_prime
+	nop
+	
+	move $t3, $zero # init primes offset
+	
+check_prime_loop:
+	bgt $t3, $t0, record_prime # exhausted primes found so far
+	nop
+	
+	lw $t4, primes($t3) # current prime to check against
+	rem $t4, $t1, $t4 # remainder
+	beqz $t4, discard_candidate
+	
+	addiu $t3, $t3, 4 # increment offset
+	j check_prime_loop
+	
+discard_candidate:
+	addiu $t1, $t1, 1 # increment candidate
+	j test_candidate
+	nop
+	
+record_prime:
+	addiu $t0, $t0, 4 # increment primes offset
+	sw $t1, primes($t0) # record prime
+	addiu $t1, $t1, 1 # increment candidate
+	j test_candidate
+	nop
+	
+	
+	
+end_nth_prime:
+	lw $v0, primes($t0)
+	jr $ra
+	nop

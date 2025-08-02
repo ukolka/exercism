@@ -1,0 +1,18 @@
+.globl is_leap_year
+
+is_leap_year:
+	remu $t0, $a0, 400 # x % 400
+	seq $v0, $t0, $zero # v0 is 1 when t0 is 0
+	beqz $t0, end_leap_year # return v0 (true) if t0 is 0
+	nop
+	
+	remu $t0, $a0, 100 # x % 100
+	sgtu $v0, $t0, $zero # v0 is 1 when t0 > 0, v0 is 0 when t0 == 0
+	beqz $t0, end_leap_year # return v0 (false) if t0 is 0
+	nop
+	
+	remu $t0, $a0, 4 # x % 4
+	seq $v0, $t0, $zero # v0 is 1 when t0 is 0
+end_leap_year:
+	jr $ra
+	nop

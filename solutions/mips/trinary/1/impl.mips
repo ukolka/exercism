@@ -1,0 +1,24 @@
+.globl trinary_convert
+
+trinary_convert:
+	or $v0, $0, $0 # reset result
+	
+next_char:
+	lb $t0, ($a0) # load char
+	nop
+	beqz $t0, end_string # if char is null - end
+	nop
+	
+	subiu $t0, $t0, 0x30 # char to int
+	
+	sll $t1, $v0, 1 # multipy result by
+	addu $v0, $t1, $v0 # 3
+	addu $v0, $v0, $t0 # add digit
+	
+	addu $a0, $a0, 1 # advance to next byte
+	j next_char
+	nop
+	
+end_string:
+	jr $ra
+	nop
